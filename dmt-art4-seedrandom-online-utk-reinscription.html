@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMT-ART</title>
+    <style>
+        body { display: flex; justify-content: flex-start; align-items: center; height: 100vh; margin: 0; background-color: #f0f0f0; }
+        .canvas-container { position: relative; width: 600px; height: 600px; margin: 20px; border: 2px solid black; }
+        #input { display: block; position: fixed; top: 20px; left: 20px; font-size: 20px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; z-index: 1000; }
+        .btc-diamond { position: absolute; bottom: 12px; left: 12px; }
+    </style>
+</head>
+<body>
+    <input id="input" type="number">
+    <div class="canvas-container">
+        <canvas id="canvas" width="600" height="600"></canvas>
+        <div class="btc-diamond">
+            <svg width="30.5" height="30" viewBox="0 0 67 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="23.5" cy="24" r="20.5" fill="#FFA500"/>
+                <text x="15" y="35" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="32.5" fill="#FFFFFF">&#x20BF;</text>
+            </svg>
+        </div>
+    </div>
+    <script src="/content/7e37766541506810ba6399c4b2735121f508bd9209df43dd200bf2316b014594i0"></script>
+    <script src="/content/c192f63c1990ee1377d51de1f5b6820eac412aa779d717b9497806a072ea49f6i0"></script>
+    <script>
+        function palin(n) {
+            let s = n.toString();
+            for (let i = 0; i <= s.length - 6; i++) {
+                let sub = s.substring(i, i + 6);
+                if (sub === sub.split('').reverse().join('')) return "palin";
+            }
+            return null;
+        }
+        function displayBTC() {
+            return `
+            <div class="btc-diamond">
+                <svg width="30.5" height="30" viewBox="0 0 67 68" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="23.5" cy="24" r="20.5" fill="#FFA500"/>
+                    <text x="15" y="35" font-family="Courier New, Courier, monospace" font-weight="bold" font-size="32.5" fill="#FFFFFF">&#x20BF;</text>
+                </svg>
+            </div>`;
+        }
+        function generateHtmlBasedOnBlockNumber(bn) { return palin(bn) ? displayBTC() : ""; }
+        const primaryColors = ['#ff0000', '#0000ff', '#ffff00', '#ffffff', '#000000'];
+        let blockNumber = '290304';
+        function drawMondrianStyle(ctx, w, h) {
+            Math.seedrandom(blockNumber);
+            const gridSize = Math.random() * (100 - 50) + 50;
+            const cols = Math.floor(w / gridSize);
+            const rows = Math.floor(h / gridSize);
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#000000';
+            for (let col = 0; col <= cols; col++) {
+                ctx.beginPath();
+                ctx.moveTo(col * gridSize, 0);
+                ctx.lineTo(col * gridSize, h);
+                ctx.stroke();
+            }
+            for (let row = 0; row <= rows; row++) {
+                ctx.beginPath();
+                ctx.moveTo(0, row * gridSize);
+                ctx.lineTo(w, row * gridSize);
+                ctx.stroke();
+            }
+            for (let col = 0; col < cols; col++) {
+                for (let row = 0; row < rows; row++) {
+                    if (Math.random() > 0.7) {
+                        const x = col * gridSize;
+                        const y = row * gridSize;
+                        const width = (Math.floor(Math.random() * 3) + 1) * gridSize;
+                        const height = (Math.floor(Math.random() * 3) + 1) * gridSize;
+                        const color = primaryColors[Math.floor(Math.random() * primaryColors.length)];
+                        ctx.fillStyle = color;
+                        ctx.fillRect(x, y, width, height);
+                        ctx.strokeRect(x, y, width, height);
+                    }
+                }
+            }
+        }
+        function generate() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMondrianStyle(ctx, canvas.width, canvas.height);
+            document.querySelectorAll('.btc-diamond').forEach(el => el.remove());
+            const btcDiamondHtml = generateHtmlBasedOnBlockNumber(blockNumber);
+            if (btcDiamondHtml) document.querySelector('.canvas-container').insertAdjacentHTML('beforeend', btcDiamondHtml);
+        }
+        function initializeView() {
+            let mintText = 'MINT_INSCRIPTION_ID';
+            if (mintText.includes('MINT_INSCRIPTION_ID')) {
+                let input = document.getElementById('input');
+                input.value = blockNumber;
+                input.addEventListener('input', () => {
+                    blockNumber = input.value;
+                    generate();
+                });
+                generate();
+            } else {
+                const request = new XMLHttpRequest();
+                request.open('GET', '/content/' + mintText);
+                request.responseType = 'text';
+                request.onload = () => initialize(request.response);
+                request.onerror = () => console.error('XHR error');
+                request.send();
+            }
+        }
+        document.addEventListener('DOMContentLoaded', initializeView);
+    </script>
+</body>
+</html>
